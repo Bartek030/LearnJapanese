@@ -1,6 +1,6 @@
 package pl.bartlomiej_swies.LearnJapanese.appUser;
 
-enum AppUserRole {
+public enum AppUserRole {
     USER,
     ADMIN
 }
