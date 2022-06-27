@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
-class AppUserService implements UserDetailsService {
+public class AppUserService implements UserDetailsService {
 
     private final static String USER_NOT_FOUND_MESSAGE = "User with email %s not found";
     private final AppUserRepository appUserRepository;
