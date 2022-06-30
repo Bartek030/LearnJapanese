@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.bartlomiej_swies.LearnJapanese.appUser.AppUser;
 import pl.bartlomiej_swies.LearnJapanese.appUser.AppUserRole;
 import pl.bartlomiej_swies.LearnJapanese.appUser.AppUserService;
+import pl.bartlomiej_swies.LearnJapanese.email.EmailSender;
 import pl.bartlomiej_swies.LearnJapanese.registration.token.ConfirmationToken;
 import pl.bartlomiej_swies.LearnJapanese.registration.token.ConfirmationTokenService;
 
@@ -18,6 +19,7 @@ class RegistrationService {
     private final AppUserService appUserService;
     private final EmailValidator emailValidator;
     private final ConfirmationTokenService confirmationTokenService;
+    private final EmailSender emailSender;
 
     String register(final RegistrationRequest request) {
         final boolean isEmailValid = emailValidator.test(request.getEmail());
@@ -35,6 +37,8 @@ class RegistrationService {
                         AppUserRole.USER
                 )
         );
+        String link = "http://localhost:8080/registration/confirm?token=" + token;
+        emailSender.send(request.getEmail(), buildEmail(request.getFirstName(), link));
         return token;
     }
 
@@ -55,5 +59,12 @@ class RegistrationService {
         confirmationTokenService.setConfirmedAt(token);
         appUserService.enableAppUser(confirmationToken.getAppUser().getEmail());
         return "confirmed";
+    }
+
+    private String buildEmail(String name, String link) {
+        return "<div>" +
+                    "Hi " + name + "! Your confirmation link: " +
+                    "<a href=\"" + link + "\">LINK</a>" +
+                "</div>";
     }
 }
