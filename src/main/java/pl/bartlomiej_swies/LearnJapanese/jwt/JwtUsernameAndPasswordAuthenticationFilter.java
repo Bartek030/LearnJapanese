@@ -41,7 +41,7 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
     protected void successfulAuthentication(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain, final Authentication authResult) throws IOException, ServletException {
 
         // TODO: Making this key much more secure - longer and more complex
-        final String secureKey = "secure";
+        final String secureKey = "securesecuresecuresecuresecuresecuresecuresecuresecuresecure";
         final String token = Jwts.builder()
                                     .setSubject(authResult.getName())
                                     .claim("authorities", authResult.getAuthorities())
