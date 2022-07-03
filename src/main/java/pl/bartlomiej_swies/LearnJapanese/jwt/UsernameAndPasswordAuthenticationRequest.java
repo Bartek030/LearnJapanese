@@ -9,6 +9,6 @@ import lombok.Setter;
 @Setter
 class UsernameAndPasswordAuthenticationRequest {
 
-    private String username;
+    private String email;
     private String password;
 }
