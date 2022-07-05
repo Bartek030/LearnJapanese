@@ -6,13 +6,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import pl.bartlomiej_swies.LearnJapanese.appUser.AppUserRole;
 import pl.bartlomiej_swies.LearnJapanese.appUser.AppUserService;
+import pl.bartlomiej_swies.LearnJapanese.jwt.JwtTokenVerifier;
 import pl.bartlomiej_swies.LearnJapanese.jwt.JwtUsernameAndPasswordAuthenticationFilter;
 
 @Configuration
@@ -30,16 +29,12 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                     .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager()))
+                    .addFilterAfter(new JwtTokenVerifier(), JwtUsernameAndPasswordAuthenticationFilter.class)
                 .authorizeRequests()
                     .antMatchers("/registration/**").permitAll()
                 .anyRequest()
                     .authenticated();
     }
-
-//    @Override
-//    public void configure(final WebSecurity web) throws Exception {
-//        web.ignoring().antMatchers("/registration/**");
-//    }
 
     @Override
     protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
