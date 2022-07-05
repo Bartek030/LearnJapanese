@@ -8,8 +8,14 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import pl.bartlomiej_swies.LearnJapanese.appUser.AppUserService;
+import pl.bartlomiej_swies.LearnJapanese.jwt.JwtConfig;
+import pl.bartlomiej_swies.LearnJapanese.jwt.JwtTokenVerifier;
+import pl.bartlomiej_swies.LearnJapanese.jwt.JwtUsernameAndPasswordAuthenticationFilter;
+
+import javax.crypto.SecretKey;
 
 @Configuration
 @AllArgsConstructor
@@ -18,18 +24,21 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final AppUserService appUserService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final SecretKey secretKey;
+    private final JwtConfig jwtConfig;
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
         http
                 .csrf().disable()
-                .authorizeRequests()
-                    .antMatchers("/registration/**")
-                    .permitAll()
-                .anyRequest()
-                    .authenticated()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .formLogin();
+                    .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager(), jwtConfig, secretKey))
+                    .addFilterAfter(new JwtTokenVerifier(secretKey, jwtConfig), JwtUsernameAndPasswordAuthenticationFilter.class)
+                .authorizeRequests()
+                    .antMatchers("/registration/**").permitAll()
+                .anyRequest()
+                    .authenticated();
     }
 
     @Override
