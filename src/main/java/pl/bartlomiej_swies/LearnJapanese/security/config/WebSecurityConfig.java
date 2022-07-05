@@ -11,8 +11,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import pl.bartlomiej_swies.LearnJapanese.appUser.AppUserService;
+import pl.bartlomiej_swies.LearnJapanese.jwt.JwtConfig;
 import pl.bartlomiej_swies.LearnJapanese.jwt.JwtTokenVerifier;
 import pl.bartlomiej_swies.LearnJapanese.jwt.JwtUsernameAndPasswordAuthenticationFilter;
+
+import javax.crypto.SecretKey;
 
 @Configuration
 @AllArgsConstructor
@@ -21,6 +24,8 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final AppUserService appUserService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final SecretKey secretKey;
+    private final JwtConfig jwtConfig;
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
@@ -28,8 +33,8 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                    .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager()))
-                    .addFilterAfter(new JwtTokenVerifier(), JwtUsernameAndPasswordAuthenticationFilter.class)
+                    .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager(), jwtConfig, secretKey))
+                    .addFilterAfter(new JwtTokenVerifier(secretKey, jwtConfig), JwtUsernameAndPasswordAuthenticationFilter.class)
                 .authorizeRequests()
                     .antMatchers("/registration/**").permitAll()
                 .anyRequest()

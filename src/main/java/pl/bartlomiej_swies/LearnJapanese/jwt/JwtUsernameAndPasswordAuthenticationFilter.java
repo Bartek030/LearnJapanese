@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import javax.crypto.SecretKey;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +23,8 @@ import java.util.Date;
 public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
+    private final JwtConfig jwtConfig;
+    private final SecretKey secretKey;
 
     @Override
     public Authentication attemptAuthentication(final HttpServletRequest request, final HttpServletResponse response) throws AuthenticationException {
@@ -40,16 +43,14 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
     @Override
     protected void successfulAuthentication(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain, final Authentication authResult) throws IOException, ServletException {
 
-        // TODO: Making this key much more secure - longer and more complex
-        final String secureKey = "securesecuresecuresecuresecuresecuresecuresecuresecuresecure";
         final String token = Jwts.builder()
                                     .setSubject(authResult.getName())
                                     .claim("authorities", authResult.getAuthorities())
                                     .setIssuedAt(new Date())
                                     .setExpiration(java.sql.Date.valueOf(LocalDate.now().plusWeeks(2)))
-                                    .signWith(Keys.hmacShaKeyFor(secureKey.getBytes()))
+                                    .signWith(secretKey)
                                     .compact();
 
-        response.addHeader("Authorization", "Bearer " + token);
+        response.addHeader(jwtConfig.getAuthorizationHeader(), jwtConfig.getTokenPrefix() + token);
     }
 }
